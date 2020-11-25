@@ -42,7 +42,7 @@ cell express_2_NFA(string expression)
 			STACK.push(Cell);
 		}
 	}
-	cout << "处理完毕!" << endl;
+	//cout << "处理完毕!" << endl;
 	Cell = STACK.top();
 	STACK.pop();
 
@@ -70,15 +70,35 @@ cell do_Join(cell Left, cell Right)
 	for (int i = 0; i < Right.EdgeCount; i++)
 	{
 		if (Right.EdgeSet[i].StartState.StateName==Right.StartState.StateName)
-		{
-			Right.EdgeSet[i].StartState = Left.EndState;
-			Right.EdgeSet[i].EndState.StateName--;
+		{	
+			for (int j = 0; j < Right.EdgeCount; j++) {
+				Right.EdgeSet[j].StartState.StateName--;
+				Right.EdgeSet[j].EndState.StateName--;
+			}
+			Right.StartState.StateName--;
+			Right.EndState.StateName--;
+			//Right.EdgeSet[i].StartState = Left.EndState;
+			//Right.EdgeSet[i].EndState.StateName--;
 			Left.EdgeSet[Left.EdgeCount++] = Right.EdgeSet[i];
 			STATE_NUM--;
 		}
 		
+		
 	}
-	Right.EndState.StateName--;//因为上面改不会改变这里，所以这里需要再改一次
+	for (int i = 0; i < Right.EdgeCount; i++)
+	{	
+		int flag = 1;
+		for (int j = 0; j < Left.EdgeCount; j++) {
+			if (Right.EdgeSet[i].StartState.StateName == Left.EdgeSet[j].StartState.StateName
+				&&Right.EdgeSet[i].EndState.StateName == Left.EdgeSet[j].EndState.StateName
+				&&Right.EdgeSet[i].TransSymbol==Left.EdgeSet[j].TransSymbol)
+				flag = 0;
+		}
+		if(flag)Left.EdgeSet[Left.EdgeCount++] = Right.EdgeSet[i];
+		
+
+	}
+	//Right.EndState.StateName--;//因为上面改不会改变这里，所以这里需要再改一次
 	Left.EndState = Right.EndState;
 	return Left;
 }
@@ -98,12 +118,12 @@ cell do_Star(cell Cell)
 	//加入左边的伊布斯隆
 	Edge2.StartState.StateName = left.StateName;
 	Edge2.EndState.StateName = right.StateName;
-	Edge2.TransSymbol = '#';
+	Edge2.TransSymbol = '~';
 	Cell.EdgeSet[Cell.EdgeCount++] = Edge2;
 	//加入右边的伊布斯隆
 	Edge3.StartState.StateName = right.StateName;
 	Edge3.EndState.StateName = newState.StateName;
-	Edge3.TransSymbol = '#';
+	Edge3.TransSymbol = '~';
 	Cell.EdgeSet[Cell.EdgeCount++] = Edge3;
 	//更新endsstate
 	Cell.EndState = Edge3.EndState;
@@ -146,18 +166,16 @@ void cell_EdgeSet_Copy(cell& Destination, cell Source)
 state new_StateNode()
 {
 	state newState;
-	newState.StateName = STATE_NUM ;//转换成大写字母
+	newState.StateName = STATE_NUM ;
 	STATE_NUM++;
 	return newState;
 }
 //接收输入正规表达式，RegularExpression作为回传函数
 void input(string &RegularExpression)
 {
-	cout << "请输入正则表达式：  （操作符：() * |;字符集：a~z A~Z）" << endl;
-	do
-	{
+	
 		cin >> RegularExpression;
-	} while (!check_legal(RegularExpression));
+
 
 }
 /**检测输入的正则表达式是否合法
@@ -190,8 +208,8 @@ int check_character(string check_string)
 		}
 		else
 		{
-			cout << "含有不合法的字符!" << endl;
-			cout << "请重新输入:" << endl;
+			//cout << "含有不合法的字符!" << endl;
+			//cout << "请重新输入:" << endl;
 			return false;
 		}
 	}
@@ -215,8 +233,8 @@ int check_parenthesis(string check_string)
 		{
 			if (STACK.empty())
 			{
-				cerr << "有多余的右括号" << endl;//暂时不记录匹配位置location
-				cout << "请重新输入:" << endl;
+			//	cerr << "有多余的右括号" << endl;//暂时不记录匹配位置location
+			//	cout << "请重新输入:" << endl;
 				return false;
 			}
 			else
@@ -226,8 +244,8 @@ int check_parenthesis(string check_string)
 	if (!STACK.empty())
 	{
 		//暂时不记录匹配位置location
-		cerr << "有多余的左括号" << endl;
-		cout << "请重新输入:" << endl;
+	//	cerr << "有多余的左括号" << endl;
+	//	cout << "请重新输入:" << endl;
 		return false;
 	}
 
@@ -238,7 +256,7 @@ int check_parenthesis(string check_string)
 */
 int is_letter(char check)
 {
-	if (check >= 'a'&&check <= 'z' || check >= 'A'&&check <= 'Z')
+	if (check >= 'a'&&check <= 'z' || check >= 'A'&&check <= 'Z'||(check>='0'&&check<='9'))
 		return true;
 	return false;
 }
@@ -285,7 +303,7 @@ string add_join_symbol(string add_string)
 	return_string[return_string_length++] = second;
 	return_string[return_string_length] = '\0';
 	string STRING(return_string);
-	cout << "加'+'后的表达式：" << STRING << endl;
+	//cout << "加'+'后的表达式：" << STRING << endl;
 	return STRING;
 }
 /*
@@ -325,7 +343,7 @@ int isp(char c)
 	case ')': return 8;
 	}
 	//若走到这一步，说明出错了
-	cerr << "ERROR!" << endl;
+	//cerr << "ERROR!" << endl;
 	return false;
 }
 //in coming priority 栈外优先级，当前扫描到的字符的优先级
@@ -341,7 +359,7 @@ int icp(char c)
 	case ')': return 1;
 	}
 	//若走到这一步，说明出错了
-	cerr << "ERROR!" << endl;
+	//cerr << "ERROR!" << endl;
 	return false;
 }
 /**中缀表达式转后缀表达式
@@ -396,22 +414,57 @@ string postfix(string e)
 		}
 	}
 
-	cout << "后缀表达式：" << out_string << endl;
+	//cout << "后缀表达式：" << out_string << endl;
 	return out_string;
 }
 /*
 	显示NFA
 */
-void Display(cell Cell)
-{
-	cout << "NFA 的边数：" << Cell.EdgeCount << endl;
-	cout << "NFA 的起始状态：" << Cell.StartState.StateName << endl;
-	cout << "NFA 的结束状态：" << Cell.EndState.StateName << endl;
-	for (int i = 0; i < Cell.EdgeCount; i++)
-	{
-		cout << "第" << i + 1 << "条边的起始状态：" << Cell.EdgeSet[i].StartState.StateName
-			<< "  结束状态：" << Cell.EdgeSet[i].EndState.StateName
-			<< "  转换符：" << Cell.EdgeSet[i].TransSymbol << endl;
+
+void Display1(cell Cell) {
+	int begin = Cell.StartState.StateName;
+	int end = Cell.EndState.StateName;
+	int cnt = Cell.EdgeCount;
+
+	cout << "X ";
+	for (int j = 0; j < cnt; j++) {
+		if (Cell.EdgeSet[j].StartState.StateName == 0) {
+			if (Cell.EdgeSet[j].EndState.StateName == end) {
+				cout << "X-" << Cell.EdgeSet[j].TransSymbol << "->" << "Y ";
+			}
+			else cout << "X-" << Cell.EdgeSet[j].TransSymbol << "->" << Cell.EdgeSet[j].EndState.StateName-1 << " ";
+		}
 	}
-	cout << "结束" << endl;
+	cout << endl << "Y" << endl;
+
+
+
+	for (int i = begin+1; i < end; i++) {
+		int flag = 1;
+		for (int j = 0; j < cnt; j++) {
+			if (Cell.EdgeSet[j].StartState.StateName==i&&Cell.EdgeSet[j].TransSymbol == '~') {
+				if (flag) {
+					cout << i - 1 << " ";
+					flag = 0;
+				}
+				if (Cell.EdgeSet[j].EndState.StateName == end)
+					cout << i - 1 << "-" << Cell.EdgeSet[j].TransSymbol << "->" << "Y ";
+				else cout << i - 1 << "-" << Cell.EdgeSet[j].TransSymbol << "->" << Cell.EdgeSet[j].EndState.StateName - 1 << " ";
+				Cell.EdgeSet[j].StartState.StateName = 2342423;
+			}
+		}
+		for (int j = 0; j < cnt; j++) {
+			if (Cell.EdgeSet[j].StartState.StateName == i) {
+				if (flag) {
+					cout << i-1 << " ";
+					flag = 0;
+				}
+				if(Cell.EdgeSet[j].EndState.StateName==end)
+					cout << i - 1 << "-" << Cell.EdgeSet[j].TransSymbol << "->" << "Y ";
+				else cout << i-1 << "-" << Cell.EdgeSet[j].TransSymbol << "->" << Cell.EdgeSet[j].EndState.StateName-1 << " ";
+			}
+		}
+		if (!flag)cout << endl;
+
+	}
 }

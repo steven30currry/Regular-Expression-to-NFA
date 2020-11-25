@@ -16,7 +16,8 @@ int main()
 	//表达式转NFA
 	NFA_Cell = express_2_NFA(Regular_Expression);
 	//显示
-	Display(NFA_Cell);
+	
+	Display1(NFA_Cell);
 
 	system("pause");
 	return 0;

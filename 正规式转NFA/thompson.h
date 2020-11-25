@@ -14,7 +14,7 @@ using namespace std;
 //节点，定义成结构体，便于以后扩展
 struct state
 {
-	int StateName;
+	char StateName;
 };
 
 //边，空转换符用'#'表示
@@ -76,5 +76,7 @@ void cell_EdgeSet_Copy(cell&, cell);
 state new_StateNode();
 //显示
 void Display(cell);
+void Display1(cell Cell);
+
 
 #endif  //THOMPSON.H

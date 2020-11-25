@@ -1,3 +1,5 @@
 ﻿  thompson.cpp
-d:\vs data\正规式转nfa\正规式转nfa\thompson.cpp(89): warning C4101: “Edge1”: 未引用的局部变量
+d:\vs data\正规式转nfa\正规式转nfa\thompson.cpp(109): warning C4101: “Edge1”: 未引用的局部变量
+d:\vs data\正规式转nfa\正规式转nfa\thompson.cpp(453): warning C4305: “=”: 从“int”到“char”截断
+d:\vs data\正规式转nfa\正规式转nfa\thompson.cpp(453): warning C4309: “=”: 截断常量值
   正规式转NFA.vcxproj -> D:\VS DATA\正规式转NFA\Debug\正规式转NFA.exe
